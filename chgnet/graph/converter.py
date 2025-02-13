@@ -120,6 +120,8 @@ class CrystalGraphConverter(nn.Module):
         """
         if float64:
             TORCH_DTYPE = torch.float64
+        else:
+            TORCH_DTYPE = torch.float32
         n_atoms = len(structure)
         atomic_number = torch.tensor(
             [site.specie.Z for site in structure],
