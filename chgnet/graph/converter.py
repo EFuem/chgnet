@@ -104,6 +104,7 @@ class CrystalGraphConverter(nn.Module):
         structure: Structure,
         graph_id=None,
         mp_id=None,
+        float64=False,
     ) -> CrystalGraph:
         """Convert a structure, return a CrystalGraph.
 
@@ -117,6 +118,8 @@ class CrystalGraphConverter(nn.Module):
         Return:
             CrystalGraph that is ready to use by CHGNet
         """
+        if float64:
+            TORCH_DTYPE = torch.float64
         n_atoms = len(structure)
         atomic_number = torch.tensor(
             [site.specie.Z for site in structure],

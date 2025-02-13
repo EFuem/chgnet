@@ -64,6 +64,7 @@ class CHGNetCalculator(Calculator):
         stress_weight: float = units.GPa,  # GPa to eV/A^3
         on_isolated_atoms: Literal["ignore", "warn", "error"] = "warn",
         return_site_energies: bool = False,
+        float64: bool = False,
         **kwargs,
     ) -> None:
         """Provide a CHGNet instance to calculate various atomic properties using ASE.
@@ -91,10 +92,11 @@ class CHGNetCalculator(Calculator):
         # Determine the device to use
         device = determine_device(use_device=use_device, check_cuda_mem=check_cuda_mem)
         self.device = device
+        self.float64 = float64
 
         # Move the model to the specified device
         if model is None:
-            self.model = CHGNet.load(verbose=False, use_device=self.device)
+            self.model = CHGNet.load(verbose=False, use_device=self.device, float64=float64)
         else:
             self.model = model.to(self.device)
         self.model.graph_converter.set_isolated_atom_response(on_isolated_atoms)
@@ -149,7 +151,7 @@ class CHGNetCalculator(Calculator):
 
         # Run CHGNet
         structure = AseAtomsAdaptor.get_structure(atoms)
-        graph = self.model.graph_converter(structure)
+        graph = self.model.graph_converter(structure, float64=self.float64)
         model_prediction = self.model.predict_graph(
             graph.to(self.device),
             task=task,

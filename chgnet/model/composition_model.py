@@ -99,7 +99,7 @@ class AtomRef(nn.Module):
         self.fc = nn.Linear(max_num_elements, 1, bias=False)
         self.fitted = False
 
-    def forward(self, graphs: list[CrystalGraph]) -> Tensor:
+    def forward(self, graphs: list[CrystalGraph], float64: bool = False) -> Tensor:
         """Get the energy of a list of CrystalGraphs.
 
         Args:
@@ -111,6 +111,8 @@ class AtomRef(nn.Module):
         if not self.fitted:
             raise ValueError("composition model needs to be fitted first!")
         composition_feas = self._assemble_graphs(graphs)
+        if float64:
+            composition_feas = composition_feas.to(torch.float64)
         return self._get_energy(composition_feas)
 
     def _get_energy(self, composition_feas: Tensor) -> Tensor:

@@ -152,6 +152,7 @@ class CHGNet(nn.Module):
             **kwargs: Additional keyword arguments
         """
         # Store model args for reconstruction
+        self.float64 = False
         self.model_args = {
             key: val
             for key, val in locals().items()
@@ -354,8 +355,7 @@ class CHGNet(nn.Module):
         """
         # Optionally, make composition model prediction
         comp_energy = (
-            0 if self.composition_model is None else self.composition_model(graphs)
-        )
+            0 if self.composition_model is None else self.composition_model(graphs, self.float64))
 
         # Make batched graph
         batched_graph = BatchedGraph.from_graphs(
@@ -693,6 +693,7 @@ class CHGNet(nn.Module):
         model_name: str = "0.3.0",
         use_device: str | None = None,
         check_cuda_mem: bool = False,
+        float64: bool = False,
         verbose: bool = True,
     ) -> Self:
         """Load pretrained CHGNet model.
@@ -733,6 +734,9 @@ class CHGNet(nn.Module):
 
         # Move the model to the specified device
         model = model.to(device)
+        if float64:
+            model = model.to(torch.float64)
+            model.float64 = True
         if verbose:
             print(f"CHGNet will run on {device}")
         return model
